@@ -430,8 +430,9 @@ main: adapt 'console [
     ; Fall through to normal CONSOLE loop handling
 ]
 
-powerbill: does [
+main: adapt 'console [
     !! {Start power calculations}
+    replpad-reset
     GSTexc: func [num][
       round/to num / GST $0.01
     ]
