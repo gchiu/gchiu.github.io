@@ -438,7 +438,7 @@ powerbill: does [
     GSTinc: func [num][
       round/to num * 1.15 $0.01
     ]
-    replpad-write/note/html space [
+    replpad-write/note/html spaced [
       {This utility calculates what your power bill might be with different providers based on information you provide.  It does need a power bill showing the number of days, and the units charged.}
       {Only a couple of providers are included initially.}
    ]
