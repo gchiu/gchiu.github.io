@@ -196,7 +196,7 @@ github-read: js-awaiter [
 
     console.log("Fetching GitHub file: " + url)
 
-    return fetch(url)
+    fetch(url)
       .then(function (response) {
 
         // https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
@@ -225,7 +225,7 @@ file-read-text: js-awaiter [
 ]{
     let location = reb.Spell(reb.ArgR("location"))
 
-    return fetch(location)  // can be relative
+    fetch(location)  // can be relative
       .then(function (response) {
 
         // https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
@@ -288,6 +288,18 @@ lib/read: read: function [
     ]
 
     fail 'source [{Cannot READ value of type} mold type of source]
+]
+
+
+hijack 'do adapt copy :do [
+    ;
+    ; !!! DO expects to be able to read source as BINARY!, but that feature is
+    ; not yet implemented as it would depend on an API entry point that took
+    ; a JS ArrayBuffer to build a binary out of.  Force read as TEXT!
+    ;
+    if file? :source [
+        source: read/string source
+    ]
 ]
 
 
