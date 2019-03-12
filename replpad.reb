@@ -430,7 +430,7 @@ main: adapt 'console [
     ; Fall through to normal CONSOLE loop handling
 ]
 
-main: does [
+powerbill: does [
     !! {Start power calculations}
     GSTexc: func [num][
       round/to num / GST $0.01
