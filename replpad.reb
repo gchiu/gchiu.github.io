@@ -446,7 +446,7 @@ main: adapt 'console [
    forever [
        prin "Enter whole days covered by this bill (Q)? "
        days: input
-       if days = "Q" [halt]
+       if days = "Q" [quit]
        if attempt [days: to-integer days][
            prin "Enter kWh used over this bill: "
            kWh: input 
