@@ -442,6 +442,11 @@ main: adapt 'console [
     ; Fall through to normal CONSOLE loop handling
 ]
 
+fred: func [ txt ][
+    REPLPAD-WRITE/HTML unspaced [<font color=red> txt </font>]
+]
+
+
 main: adapt 'console [
     !! {Start power calculations}
     replpad-reset
@@ -469,7 +474,7 @@ main: adapt 'console [
                ; got valid days and kWh so now calculate various scenarios
                
                ;;== 1. EnergyClub
-               print "EnergyClub - standard user"
+               fred "EnergyClub - standard user"
                print "Fixed Costs"
                GST: 1 ; all rates are GST inclusive
                metering-per-day: $0.302466
@@ -502,7 +507,7 @@ main: adapt 'console [
                solar-pkwh: $0.08
                daily-fixed-charge: $2.2465
                electricity-authority-levy-per-kwh: $0.001265
-               print "Mercury low user"
+               fred "Mercury low user"
                print spaced ["Standard - Anytime per kWh:" energy-pkwh]
                print spaced ["Daily Fixed charge:" daily-fixed-charge]
                energy-costs: GSTinc energy-pkwh * kWh
@@ -519,7 +524,7 @@ main: adapt 'console [
                solar-pkwh: $0.08
                daily-fixed-charge: $0.3333
                electricity-authority-levy-per-kwh: $0.001265
-               print "Mercury Everyday User"
+               fred "Mercury Everyday User"
                print spaced ["Standard - Anytime per kWh:" energy-pkwh]
                print spaced ["Daily Fixed charge:" daily-fixed-charge]
                energy-costs: GSTinc energy-pkwh * kWh
