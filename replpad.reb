@@ -418,8 +418,15 @@ main: adapt 'console [
     ; Fall through to normal CONSOLE loop handling
 ]
 
-fred: func [ txt /newln][
+; red text
+fred: func [txt /newln][
     REPLPAD-WRITE/HTML unspaced [<font color=red> txt </font>]
+    if newln [print newline]
+]
+
+; bold text
+fbold: func [txt /newln][
+    REPLPAD-WRITE/HTML unspaced [<strong> txt </strong>]
     if newln [print newline]
 ]
 
@@ -454,7 +461,7 @@ main: adapt 'console [
                
                ;;== 1. EnergyClub
                fred/newln "EnergyClub - standard user"
-               print "Fixed Costs"
+               fbold/newln "Fixed Costs"
                GST: 1 ; all rates are GST inclusive
                metering-per-day: $0.302466
                network-per-day: $1.265
@@ -468,7 +475,7 @@ main: adapt 'console [
                print spaced ["Network Line Charges" network-charges: network-per-day * days]
                print spaced ["Industry Levies" industry-charges: industry-per-day * days]
 
-               print "Variable Charges"
+               fbold "Variable Charges"
                print spaced ["Energy Supply Costs:" energy-costs: energy-pkwh * kWh]
                print spaced ["Solar Rebate:" solar-rebate: negate solar-pkwh * ep]
                print spaced ["Network Line Charges (Uncontrolled):" network-line-costs: kwH * network-uncontrolled-per-kwh]
