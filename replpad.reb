@@ -426,7 +426,7 @@ fred: func [txt /newln][
 
 ; bold text
 fbold: func [txt /newln][
-    REPLPAD-WRITE/HTML unspaced [<u> txt </u>]
+    REPLPAD-WRITE/HTML unspaced [<i> txt </i>]
     if newln [print newline]
 ]
 
@@ -440,11 +440,13 @@ main: adapt 'console [
     GSTinc: func [num][
       round/to num * 1.15 $0.01
     ]
-    fbold/newln "This should be underlined text!"
     replpad-write/note/html spaced [
       {This utility calculates what your power bill might be with different providers based on information you provide.  It does need a power bill showing the number of days, and the units charged.}
       {Only a couple of providers are included initially.}
    ]
+   
+   fbold/newln "this should be underlined!"
+   
    forever [
        prin "Enter whole days covered by this bill (Q): "
        days: input
