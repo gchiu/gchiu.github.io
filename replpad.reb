@@ -430,7 +430,6 @@ fbold: func [txt /newln][
     if newln [print newline]
 ]
 
-
 main: adapt 'console [
     !! {Start power calculations}
     replpad-reset
@@ -445,7 +444,7 @@ main: adapt 'console [
       {Only a couple of providers are included initially.}
    ]
    
-   fbold/newln "this should be underlined!"
+   ; fbold/newln "this should be underlined!"
    
    forever [
        prin "Enter whole days covered by this bill (Q): "
@@ -525,9 +524,6 @@ main: adapt 'console [
                
                print ["Total inc GST" total-incgst: round/to network-levy-costs + energy-costs + daily-fixed + solar-rebate $0.01]
                print newline 
-
-
-
                fred/newln "Start New Calculation" 
            
            ] else [
