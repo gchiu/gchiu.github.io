@@ -462,14 +462,15 @@ main: adapt 'console [
       {Only a couple of providers are included initially.}
    ]
    forever [
-       prin "Enter whole days covered by this bill (Q)? "
+       prin "Enter whole days covered by this bill (Q): "
        days: input
        if days = "Q" [quit]
        if attempt [days: to-integer days][
            prin "Enter kWh used over this bill: "
            kWh: input 
            if attempt [kwH: to decimal! kwH][
-               prin "Enter kWh exported to the Grid over this period.  Enter 0 or return if you don't have solar panels! "
+               print "Enter kWh exported to the Grid over this period.  
+               prin "Enter 0 or return if you don't have solar panels! "
                ep: 0
                attempt [ep: to decimal! input]
                ; got valid days and kWh so now calculate various scenarios
