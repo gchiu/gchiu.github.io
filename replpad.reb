@@ -446,7 +446,7 @@ main: adapt 'console [
            prin "Enter kWh used over this bill: "
            kWh: input 
            if attempt [kwH: to decimal! kwH][
-               print "Enter kWh exported to the Grid over this period.  
+               print "Enter kWh exported to the Grid over this period."  
                prin "Enter 0 or return if you don't have solar panels! "
                ep: 0
                attempt [ep: to decimal! input]
