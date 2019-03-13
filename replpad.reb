@@ -466,6 +466,7 @@ main: adapt 'console [
        days: input
        if days = "Q" [quit]
        if attempt [days: to-integer days][
+           if zero? days [break]
            prin "Enter kWh used over this bill: "
            kWh: input 
            if attempt [kwH: to decimal! kwH][
