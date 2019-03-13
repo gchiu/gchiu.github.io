@@ -448,7 +448,7 @@ main: adapt 'console [
    
    forever [
        prin "Enable JS tracing? (y/n) "
-       if y = input [JS-TRACE ON]
+       if "y" = input [JS-TRACE ON]
        print newline
        prin "Enter whole days covered by this bill (Q): "
        days: input
