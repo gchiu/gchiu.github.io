@@ -448,7 +448,7 @@ main: adapt 'console [
    
    forever [
        prin "Enable JS tracing? (y/n) "
-       if "y" = input [JS-TRACE ON]
+       [JS-TRACE ON ("y" = input)]
        print newline
        prin "Enter whole days covered by this bill (Q): "
        days: input
@@ -480,7 +480,7 @@ main: adapt 'console [
                print spaced ["Network Line Charges" network-charges: network-per-day * days]
                print spaced ["Industry Levies" industry-charges: industry-per-day * days]
 
-               fbold "Variable Charges"
+               fbold/newln "Variable Charges"
                print spaced ["Energy Supply Costs:" energy-costs: energy-pkwh * kWh]
                print spaced ["Solar Rebate:" solar-rebate: negate solar-pkwh * ep]
                print spaced ["Network Line Charges (Uncontrolled):" network-line-costs: kwH * network-uncontrolled-per-kwh]
