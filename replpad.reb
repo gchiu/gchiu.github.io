@@ -525,6 +525,7 @@ main: adapt 'console [
            ]        
        ] else [print "Needs integer value for days of power bill"]
    ]
+   main ; if break, restart the loop
 ]
 
 ; Having QUIT exit the interpreter can be useful in some debug builds which
