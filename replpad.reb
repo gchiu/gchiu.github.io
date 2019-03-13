@@ -442,8 +442,9 @@ main: adapt 'console [
     ; Fall through to normal CONSOLE loop handling
 ]
 
-fred: func [ txt ][
+fred: func [ txt /newln][
     REPLPAD-WRITE/HTML unspaced [<font color=red> txt </font>]
+    if newln [print newline]
 ]
 
 
@@ -474,7 +475,7 @@ main: adapt 'console [
                ; got valid days and kWh so now calculate various scenarios
                
                ;;== 1. EnergyClub
-               fred "EnergyClub - standard user"
+               fred/newln "EnergyClub - standard user"
                print "Fixed Costs"
                GST: 1 ; all rates are GST inclusive
                metering-per-day: $0.302466
@@ -507,7 +508,7 @@ main: adapt 'console [
                solar-pkwh: $0.08
                daily-fixed-charge: $2.2465
                electricity-authority-levy-per-kwh: $0.001265
-               fred "Mercury low user"
+               fred/newln "Mercury low user"
                print spaced ["Standard - Anytime per kWh:" energy-pkwh]
                print spaced ["Daily Fixed charge:" daily-fixed-charge]
                energy-costs: GSTinc energy-pkwh * kWh
@@ -524,7 +525,7 @@ main: adapt 'console [
                solar-pkwh: $0.08
                daily-fixed-charge: $0.3333
                electricity-authority-levy-per-kwh: $0.001265
-               fred "Mercury Everyday User"
+               fred/newln "Mercury Everyday User"
                print spaced ["Standard - Anytime per kWh:" energy-pkwh]
                print spaced ["Daily Fixed charge:" daily-fixed-charge]
                energy-costs: GSTinc energy-pkwh * kWh
@@ -539,7 +540,7 @@ main: adapt 'console [
 
 
 
-               print "Start New Calculation"
+               fred/newln "Start New Calculation" 
            
            ] else [
                print "A valid number if required for power consumption"
