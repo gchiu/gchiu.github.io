@@ -426,7 +426,7 @@ fred: func [txt /newln][
 
 ; bold text
 fbold: func [txt /newln][
-    REPLPAD-WRITE/HTML unspaced [<strong> txt </strong>]
+    REPLPAD-WRITE/HTML unspaced [<u> txt </u>]
     if newln [print newline]
 ]
 
