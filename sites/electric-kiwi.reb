@@ -1,6 +1,6 @@
 Rebol []
 
-rates: make object! [
+rates: [
   make object! [
     name: "Electric Kiwi Low User - Loyal Kiwi"
     kw-charge: make object! [
