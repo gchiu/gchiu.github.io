@@ -3,6 +3,7 @@ Rebol []
 rates: [
   make object! [
     name: "Electric Kiwi Low User - Loyal Kiwi"
+    location: "Wellington"
     kw-charge: make object! [
       kwH: $0.2744
       notes: "one year commitment"
@@ -14,6 +15,7 @@ rates: [
  
  make object! [
    name: "Electric Kiwi Low User - Kiwi"
+   location: "Wellington"
    kw-charge: make object! [
       kwH: $0.2890
       notes: "everyday great rates"
@@ -36,6 +38,7 @@ rates: [
  
  make object! [
     name: "Electric Kiwi Standard User - Loyal Kiwi"
+    location: "Wellington"
     kw-charge: make object! [
       kwH: $0.2140
       notes: "one year commitment"
@@ -47,6 +50,7 @@ rates: [
  
  make object! [
    name: "Electric Kiwi Standard User - Kiwi"
+   location: "Wellington"
    kw-charge: make object! [
       kwH: $0.2197
       notes: "everyday great rates"
@@ -58,6 +62,7 @@ rates: [
   
   make object! [
    name: "Electric Kiwi Standard User - Stay Ahead 200"
+   location: "Wellington"
    kw-charge: make object! [
       kwH: $0.2354
       notes: "10% top-up bonus"
@@ -66,7 +71,4 @@ rates: [
       fixed: $1.7700
    ]
  ]
- 
-  
-
 ]
