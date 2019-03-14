@@ -14,7 +14,7 @@ rates: make object! [
  
  make object! [
    name: "Electric Kiwi Low User - Kiwi"
-   kw-charge: make object!
+   kw-charge: make object! [
       kwH: $0.2890
       notes: "everyday great rates"
    ]
@@ -25,7 +25,7 @@ rates: make object! [
   
   make object! [
    name: "Electric Kiwi Low User - Stay Ahead 200"
-   kw-charge: make object!
+   kw-charge: make object! [
       kwH: $0.2992
       notes: "10% top-up bonus"
    ]
@@ -47,7 +47,7 @@ rates: make object! [
  
  make object! [
    name: "Electric Kiwi Standard User - Kiwi"
-   kw-charge: make object!
+   kw-charge: make object! [
       kwH: $0.2197
       notes: "everyday great rates"
    ]
@@ -58,7 +58,7 @@ rates: make object! [
   
   make object! [
    name: "Electric Kiwi Standard User - Stay Ahead 200"
-   kw-charge: make object!
+   kw-charge: make object! [
       kwH: $0.2354
       notes: "10% top-up bonus"
    ]
