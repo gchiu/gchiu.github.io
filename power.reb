@@ -1,3 +1,9 @@
+rebol [
+    date: 16-Mar-2019
+    author: "Graham Chiu"
+    notes: {A function 'power to calculate rates from NZ power suppliers}
+]
+
 ; red text
 fred: func [txt /newln][
     REPLPAD-WRITE/HTML unspaced [<font color=red> txt </font>]
