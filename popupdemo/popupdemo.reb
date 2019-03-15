@@ -1,5 +1,5 @@
 REBOL [
-    Title: {Primordial VID-in-Web-Browser Demo}
+    Title: {Primordial Popup Window via libRebol in JavaScript}
 
     Description: {
        This is a proof-of-concept of how JavaScript UI concepts could
@@ -13,43 +13,25 @@ REBOL [
        would likely benefit from a framework.  I just don't know what a
        good choice would be at the time of writing.
 
-       What this is really for is just to explore issues of a more
-       complex UI and how it might be involved with things like
+       What this is really for is just to explore fundamentals of a
+       windowed UI and how it might be involved with things like
        infinite loops, halting, and other cross-cutting concerns.
     }
 ]
 
-init-webvid: js-awaiter [] {
-    // 
-    // https://stackoverflow.com/a/577002
-    // 
-    /* reb.Elide("print {Loading %webvid.css}") */  // !!! review
-    var head  = document.getElementsByTagName('head')[0]
-    var link  = document.createElement('link')
-    link.id   = 'vidcss'
-    link.rel  = 'stylesheet'
-    link.type = 'text/css'
-    link.href = 'webvid.css'  // can be arbitrary URL
-    link.media = 'all'
-    head.appendChild(link)
-
-    // https://stackoverflow.com/a/14521482
-    //
-    var script = document.createElement('script')
-    script.onload = function() {  // resolve() can't use onload()'s arg
-        resolve(function() {
-            /* reb.Elide("print {%webvid.js Loaded}") */  // !!! review
-        })  // printing to test using an emterpreter callback
-    }
-    script.src = 'webvid.js'
-    document.head.appendChild(script)
-}
-
-init-webvid
+; !!! Issue: Right now what DO does is based on READ/STRING since the hook to
+; fetch() => BINARY! has not been made.  This means the path is not known, and
+; so it runs from wherever.  :-/  The startup "directory" of the JS app should
+; be set to the URL of the page, so it knows where it is and can track DO-ing
+; relative URLs.  Until then, JS-DO and CSS-DO are stuck being relative to
+; the URL in the bar, not the URL of the script.
+;
+css-do %popupdemo/popupdemo.css
+js-do %popupdemo/popupdemo.js
 
 show-dialog: js-native [] {
     setDialog("open", {
-        title: "The Dialog Box Title",
+        title: "Popup Demo",
         width: 400,
         height: 200,
         content: "Hello!",
@@ -78,5 +60,5 @@ hide-dialog: js-native [] {
     setDialog("close")
 }
 
-print "%webvid.reb load completed"
+print "Popup Demo (JavaScript/CSS from https://codepen.io/tovic/pen/XJEONy)"
 print "Try SHOW-DIALOG and HIDE-DIALOG"
