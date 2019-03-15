@@ -472,6 +472,7 @@ fbold: func [txt /newln][
 
 main: adapt 'console [
     !! {Start power calculations}
+    js-trace on
     replpad-reset
     GSTexc: func [num][
       round/to num / GST $0.01
