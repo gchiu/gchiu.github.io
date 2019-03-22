@@ -196,6 +196,27 @@ read-url-helper: js-awaiter [
     }  // if using emterpreter, need callback to use APIs in resolve()
 }
 
+js-head: js-awaiter [
+    return: [binary!]
+    url [text!]
+]{
+    let url = reb.Spell(reb.ArgR('url'))
+
+    let response = await fetch(url, {method: 'HEAD'})  // can be relative
+
+    // https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
+    if (!response.ok)
+        throw Error(response.statusText)
+
+    let buffer = await response.arrayBuffer()
+
+    return function () {
+        return reb.Binary(buffer)
+    }  // if using emterpreter, need callback to use APIs in resolve()
+}
+
+
+
 
 ; While raw.github.com links are offered via CORS, raw gitlab.com links
 ; (specified by a /raw/ in their URL) are not.  However, GitLab offers CORS via
