@@ -514,7 +514,7 @@ fbold: func [txt /newln][
     if newln [print newline]
 ]
 
-main: adapt 'console [
+nzpower: adapt 'console [
     !! {Start power calculations}
     js-trace on
     replpad-reset
