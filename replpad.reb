@@ -177,27 +177,8 @@ lib/write: write: function [
 ]
 
 
-read-url-string-helper: js-awaiter [
-    return: [text!]
-    url [text!]
-]{
-    let url = reb.Spell(reb.ArgR('url'))
-
-    let response = await fetch(url)  // can be relative
-
-    // https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
-    if (!response.ok)
-        throw Error(response.statusText)
-
-    let text = await response.text()
-
-    return function () {
-        return reb.Text(text)
-    }  // if using emterpreter, need callback to use APIs in resolve()
-}
-
-read-url-binary-helper: js-awaiter [
-    return: [text!]
+read-url-helper: js-awaiter [
+    return: [binary!]
     url [text!]
 ]{
     let url = reb.Spell(reb.ArgR('url'))
@@ -215,16 +196,49 @@ read-url-binary-helper: js-awaiter [
     }  // if using emterpreter, need callback to use APIs in resolve()
 }
 
+
+; While raw.github.com links are offered via CORS, raw gitlab.com links
+; (specified by a /raw/ in their URL) are not.  However, GitLab offers CORS via
+; an API...so for our GitLab open source brothers & sisters we level the
+; playing field by simulating raw url fetch() via API.
+;
+; (At the DO level, the "/blob" links to decorated HTML are proxied in both
+; cases, since you presumably weren't DO'ing HTML...though you could have been
+; trying to READ it)
+;
+CORSify-if-gitlab-url: function [
+    return: [file! url!]
+    url [file! url!]
+][
+    parse url [
+        "http" opt ["s" (secure: true) | (secure: false)] "://gitlab.com/"
+        copy user: to "/" skip
+        copy repo: to "/" skip
+        "raw/" copy branch: to "/" skip  ; skip slash, file_path would %-encode
+        copy file_path: to end
+    ] then [
+        ; https://docs.gitlab.com/ee/api/repository_files.html#get-file-from-repository
+
+        replace/all file_path "/" "%2F"  ; API uses slashes for its delimiting
+
+        if not secure [
+            print ["Converting non-HTTPS URL to HTTPS:" url]
+        ]
+        join-all [
+            https://gitlab.com/api/v4/projects/
+            user "%2F" repo  ; surrogate for numeric id, use escaped `/`
+            "/repository/files/" file_path "/raw?ref=" branch
+        ]
+    ] else [
+        url
+    ]
+]
+
 lib/read: read: function [
     source [any-value!]
-    /string
 ][
     if match [file! url!] source [
-        return either string [
-            read-url-string-helper as text! source
-        ][
-            read-url-binary-helper as text! source
-        ]
+        return read-url-helper as text! CORSify-if-gitlab-url source
     ]
 
     fail 'source [{Cannot READ value of type} mold type of source]
@@ -243,15 +257,7 @@ hijack 'do adapt copy :do [
     ; here to shorten calling demos and get them out of the root directory.
     ;
     source: maybe switch source [
-        <popupdemo> [%popupdemo/popupdemo.reb]
-    ]
-
-    ; !!! DO expects to be able to read source as BINARY!, but that feature is
-    ; not yet implemented as it would depend on an API entry point that took
-    ; a JS ArrayBuffer to build a binary out of.  Force read as TEXT!
-    ;
-    if file? :source [
-        source: read/string source
+        <popupdemo> [https://gitlab.com/hostilefork/popupdemo/raw/master/popupdemo.reb]
     ]
 ]
 
@@ -273,12 +279,21 @@ js-do-url-helper: js-awaiter [  ; https://stackoverflow.com/a/14521482
 js-do: function [
     {Execute a JavaScript file or evaluate a string of JavaScript source}
 
+    return: <void>  ; What useful return result could there be?
     source [text! file! url!]
+    /automime "Subvert incorrect server MIME-type by requesting via fetch()"
 ][
     if text? source [
         eval js-native [] source  ; !!! slightly inefficient, works for now
     ] else [
-        js-do-url-helper as text! source
+        if file? source [  ; make absolute w.r.t. *current* script URL location
+            source: join (ensure url! what-dir) source
+        ]
+        if automime [
+            eval js-native [] as text! read CORSify-if-gitlab-url source
+        ] else [
+            js-do-url-helper as text! source
+        ]
     ]
 ]
 
@@ -289,7 +304,7 @@ css-do-text-helper: js-native [  ; https://stackoverflow.com/a/707580
     let css = document.createElement('style')
     /* css.id = ... */  // could be good for no duplicates, deleting later
     css.type = 'text/css'
-    css.innerHTML = reb.Spell(reb.argR('text'))
+    css.innerHTML = reb.Spell(reb.ArgR('text'))
     document.head.appendChild(css)
 }
 
@@ -312,11 +327,19 @@ css-do: function [
     return: <void>  ; Could return an auto-generated ID for later removing (?)
     ; :id [<skip> issue!]  ; Idea: what if you could `css-do #id {...}`
     source [text! file! url!]
+    /automime "Subvert incorrect server MIME-type by requesting via fetch()"
 ][
     if text? source [
         css-do-text-helper source
     ] else [
-        css-do-url-helper as text! source
+        if file? source [  ; make absolute w.r.t. *current* script URL location
+            source: join (ensure url! what-dir) source
+        ]
+        if automime [
+            css-do-text-helper as text! read CORSify-if-gitlab-url source
+        ] else [
+            css-do-url-helper as text! source
+        ]
     ]
 ]
 
@@ -335,8 +358,8 @@ lib/browse: browse: function [
         let url = reb.Spell(rebArgR('url'))
 
         if (false) {
-            let win = window.open(url, '_blank');
-            win.focus();
+            let win = window.open(url, '_blank')
+            win.focus()
         }
     }
 
