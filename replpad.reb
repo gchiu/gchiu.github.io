@@ -202,7 +202,7 @@ js-head: js-awaiter [
 ]{
     let url = reb.Spell(reb.ArgR('url'))
 
-    let response = await fetch(url, {method: 'HEAD', headers: {"User-Agent": "Rebol/web" })  // can be relative
+    let response = await fetch(url, {method: 'HEAD', headers: {"User-Agent": "Rebol/web" }})  // can be relative
 
     // https://www.tjvantoll.com/2015/09/13/fetch-and-errors/
     if (!response.ok)
