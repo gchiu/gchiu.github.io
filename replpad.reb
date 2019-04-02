@@ -534,4 +534,3 @@ hijack 'quit adapt copy :quit [
     ; Fall through to normal QUIT handling
 ]
 
-do <nzpower>
