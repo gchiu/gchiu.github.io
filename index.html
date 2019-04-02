@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -54,19 +54,12 @@
     >
     <!-- See https://fonts.google.com/ -->
 
+    <!-- !!! CSS for splitter is tied in with ReplPad--review strategy. -->
     <!-- https://github.com/nathancahill/Split.js -->
-    <script src="./lib/split.js"></script>
-    <!-- splitter css in replpad.css -->
-
-    <!-- https://github.com/irhc/table-resize -->
-    <script src="./lib/table-resize.js"></script>
-    <!-- table resize css in replpad.css -->
+    <link rel="stylesheet" type="text/css" href="./watchlist/split.css">
 
     <script src="https://metaeducation.s3.amazonaws.com/travis-builds/load-r3.js"></script>
     <script src="./gui.js"></script>
-
-    <!-- For pragmatic reasons, replpad does some tests before REPL starts -->
-    <script src="./tests/toplevel.test.js"></script>
 
     <link rel="stylesheet" type="text/css" href="replpad.css">
   </head>
@@ -95,65 +88,11 @@
             If load fails, check dev console for errors (typically Ctrl-Shift-I).  Repository is at <a href="https://github.com/hostilefork/replpad-js">GitHub</a>
           </div>
           <div><hr></div>
-          <div class="line">
-            %index.html fetch complete...
+          <div class="line" id="console_out">
+            <p>%index.html fetch complete...</p>
           </div>
         </div>
       </div>
-      <!-- Just putting a table here with the splitter to get a feel for how
-        compatible the approach is in various browsers; there's a bunch of
-        more important things to get in place before making the watchlist
-        actually work...one aspect is to make it use the libRebol from JS
-        vs. need to be in C that gets recompiled on each change...  -->
-      <div id="right" class="split split-horizontal" style='display: none;'>
-        <table id='watchlist' class='watchlist'>
-          <thead>
-            <tr>
-              <th></th><!-- superfluous to label this with # or similar -->
-              <th>Watch</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr onmousedown="RowClick(this,false);">
-              <td>1</td>
-              <td>x</td>
-              <td>300</td>
-            </tr>
-            <tr onmousedown="RowClick(this,false);">
-              <td>2</td>
-              <td>(x + 4)</td>
-              <td>304</td>
-            </tr>
-            <tr onmousedown="RowClick(this,false);">
-              <td>3</td>
-              <td>&lt;before&gt;</td>
-              <td>[a b c]</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="menu">
-      <a href="https://chat.stackoverflow.com/rooms/291/">
-        <img src="https://raw.githubusercontent.com/gchiu/gchiu.github.io/master/favicon.ico" />
-        Rebol Chat
-        <span>Ctrl + ?!</span>
-      </a>
-      <hr />
-      <a href="#" onclick="OnMenuCut();">
-        Cut
-        <span>Ctrl + ?!</span>
-      </a>
-      <a href="#" onclick="OnMenuCopy();">
-        Copy
-        <span>Ctrl + ?!</span>
-      </a>
-      <a href="#" onclick="OnMenuPaste();">
-        Paste
-        <span>Ctrl + ?!</span>
-      </a>
     </div>
   </body>
 </html>
