@@ -28,7 +28,7 @@
 ]{
     console.log(
         "@" + reb.Tick() + ": "
-        + reb.Spell("form", reb.R(reb.Arg('message')))
+        + reb.Spell("spaced", reb.R(reb.Arg('message')))
     )
 }
 
@@ -149,7 +149,17 @@ lib/input: input: js-awaiter [
     // callbacks dealing with input can call it when input is finished.
     //
     return new Promise(function(resolve, reject) {
-        input_resolve = resolve
+        input_resolve = function(text) {
+            //
+            // Note that the awaiter is still in effect when this resolve
+            // function is called (it hasn't been resolved, hence not finished)
+            // This means the emterpreted build still has the bytecode
+            // interpreter tied up, so evaluative functions aren't available.
+            // reb.Text() is legal, and resolving with a reb.Promise() should
+            // also be legal eventually...
+            //
+            resolve(reb.Text(text))
+        }
     })
 }
 
@@ -190,10 +200,7 @@ read-url-helper: js-awaiter [
         throw Error(response.statusText)
 
     let buffer = await response.arrayBuffer()
-
-    return function () {
-        return reb.Binary(buffer)
-    }  // if using emterpreter, need callback to use APIs in resolve()
+    return reb.Binary(buffer)
 }
 
 js-head: js-awaiter [
@@ -436,59 +443,6 @@ lib/browse: browse: function [
     ]
 ]
 
-
-js-watch-visible: js-awaiter [
-    visible [logic!]
-]{
-    let visible = reb.Did(reb.R(reb.Arg('visible')))
-
-    let right_div = document.getElementById('right')
-
-    // Suggestion from author of split.js is destroy/recreate to hide/show
-    // https://github.com/nathancahill/Split.js/issues/120#issuecomment-428050178
-    //
-    if (visible) {
-        if (!splitter) {
-            replcontainer.classList.add('split-horizontal')
-            right_div.style.display = 'block'
-            splitter = Split(['#replcontainer', '#right'], {
-                sizes: splitter_sizes,
-                minSize: 200
-            })
-        }
-    }
-    else {
-        // While destroying the splitter, remember the size ratios so that the
-        // watchlist comes up the same percent of the screen when shown again.
-        //
-        if (splitter) {
-            replcontainer.classList.remove('split-horizontal')
-            splitter_sizes = splitter.getSizes()
-            right_div.style.display = 'none'
-            splitter.destroy()
-            splitter = undefined
-        }
-    }
-}
-
-watch: function [
-    :arg [
-        word! get-word! path! get-path!
-        block! group!
-        integer! tag! refinement!
-    ]
-        {word to watch or other legal parameter, see documentation)}
-][
-    ; REFINEMENT!s are treated as instructions.  `watch /on` seems easy...
-    ;
-    switch arg [
-        /on [js-watch-visible true]
-        /off [js-watch-visible false]
-
-        fail ["Bad command:" arg]
-    ]
-]
-
 ; !!! The ABOUT command was not made part of the console extension, since
 ; non-console builds might want to be able to ask it from the command line.
 ; But it was put in HOST-START and not the mezzanine/help in general.  This
@@ -522,6 +476,9 @@ main: adapt 'console [
     chat: https://chat.stackoverflow.com/rooms/291/rebol
     forum: https://forum.rebol.info
 
+    wasm-threads: https://developers.google.com/web/updates/2018/10/wasm-threads
+    instructions: https://github.com/hostilefork/replpad-js/wiki/Enable-WASM-Threads
+
     link: [href label] => [
         unspaced [{<a href="} href {" target="_blank">} label {</a>}]
     ]
@@ -540,6 +497,25 @@ main: adapt 'console [
         {<br><br>}
 
         {<i>(Note: SHIFT-ENTER to type in multi-line code, Ctrl-Z to undo)</i>}
+    ]
+
+    if system/version = 2.102.0.16.1 [
+        replpad-write/html spaced [
+            {!!! Heads Up 😮 !!!  Your browser is <i>not</i> configured for}
+            unspaced [(link wasm-threads {WebAssembly with Threads}) "."]
+
+            {Threads are used so side-effects like this PRINT statement show}
+            {in the web browser without having to terminate the Rebol stack.}
+            {What you're using now is a VERY slow and kludgey workaround.}
+
+            {<br><br>}
+
+            {To run at speeds up to 30x faster, enable SharedArrayBuffer}
+            {and WASM threads:} (link instructions {<b>INSTRUCTIONS HERE</b>})
+
+            {<hr>}
+            {<br>}
+        ]
     ]
 
     ; Fall through to normal CONSOLE loop handling
@@ -662,6 +638,25 @@ nzpower: adapt 'console [
    ]
    main ; if break, restart the loop
 ]
+
+watch: function [:arg] [
+    ;
+    ; We don't want to pay for loading the watchlist unless it's used.  So
+    ; delayed-load it on first use.
+    ;
+    ; Note: When it was being automatically loaded, it was observed that it
+    ; could not be loaded before REPLPAD-WRITE/HTML.  Investigate.
+    ;
+    print "Loading watchlist extension for first use..."
+    do %watchlist/main.reb
+
+    ; !!! Watch hard quotes its argument...need some kind of variadic
+    ; re-triggering mechanism (e.g. this WATCH shouldn't have any arguments,
+    ; but be able to inline WATCH to gather args)
+    ;
+    do compose [watch (:arg)]
+]
+
 
 ; Having QUIT exit the interpreter can be useful in some debug builds which
 ; check various balances of state.

@@ -127,47 +127,50 @@ function DeactivateInput() {
 }
 
 
-var splitter_sizes = [75, 25]
-var splitter  // will be created by the JS-WATCH-VISIBLE command
-
 document.addEventListener('DOMContentLoaded', function () {  //...don't indent
 
 //=//// DOMContentLoaded Handled ///////////////////////////////////////////=//
 
-// !!! The TableResize component is flaky and doesn't seem to work here, but
-// there does not seem to be much in the way of viable non-jQuery codebases
-// that do this.  So taking ownership and cleaning it up is one option, or
-// just biting the bullet and including jQuery is another...but the one table
-// resize widget that worked wasn't just jQuery but it involved a build
-// process... so that was a double-whammy.  Review the issue as the ground
-// rules for this evolve.
-//
-new TableResize(
-    document.getElementById('example'),
-    {distance: 100, minWidth: 60, restoreState: true, fixed: true}
-)
-
 var replcontainer = document.getElementById('replcontainer')
 replpad = document.getElementById('replpad')
 replpad.onclick = OnClickReplPad
+
+
+// When pasting is performed, we want to strip off the formatting to get plain
+// text (so it does not corrupt the ReplPad's structure).  Also, we do not
+// want people copying out code samples to get the formatting (e.g. the subtle
+// difference of bold for PRINT output, and normal weight for user input.)
+//
+// https://stackoverflow.com/q/12027137/
+//
+replpad.addEventListener("paste", (e) => {
+    e.preventDefault();  // cancel HTML-based paste
+    var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+    document.execCommand("insertText", false, text);  // insertText is new-ish
+});
+
+replpad.addEventListener('copy', (e) => {
+    const selection = document.getSelection();
+    e.clipboardData.setData('text/plain', selection.toString());
+    e.preventDefault();  // cancel HTML-based paste
+});
+
 
 // As part of a complex trick that flips the repl upside down and back again
 // to get decent scroll bar behavior, we have to compensate for the reversed
 // mouse wheel direction.  See CSS file for notes on this.
 // https://stackoverflow.com/a/34345634
 //
-document.querySelector("#replcontainer").addEventListener("wheel",
-    function(e) {
-        if (e.deltaY) {
-            let target = e.currentTarget
-            let fontsize = parseFloat(
-                getComputedStyle(target).getPropertyValue('font-size')
-            )
-            e.preventDefault();
-            target.scrollTop -= fontsize * (e.deltaY < 0 ? -1 : 1) * 2;
-        }
+document.querySelector("#replcontainer").addEventListener("wheel", (e) => {
+    if (e.deltaY) {
+        let target = e.currentTarget
+        let fontsize = parseFloat(
+            getComputedStyle(target).getPropertyValue('font-size')
+        )
+        e.preventDefault();
+        target.scrollTop -= fontsize * (e.deltaY < 0 ? -1 : 1) * 2;
     }
-);
+});
 
 
 // MagicUndo is a feature from Ren Garden.  It would notice when the undo list
@@ -282,31 +285,10 @@ onInputKeyDown = function(e) {
         // that way for plain INPUT.  Richer choices should be available, but
         // one wants a standard program to work standardly.
         //
-        let new_line = load("<div class='line'>&zwnj;</div>")
+        let new_line = load("<div class='line'></div>")
         replpad.appendChild(new_line)
 
-        if (use_emterpreter) {
-            //
-            // !!! If building with the emterpreter, EXPORTED_FUNCTIONS may
-            // not be called during an emscripten_sleep_with_yield().  This
-            // means resolving the promise that REPLPAD-INPUT is waiting on
-            // can't be done with a reb.Text() value, because we can't call
-            // reb.Text()!
-            //
-            // Hence the resolver takes a function which is called to produce
-            // the value at a time when it is no longer yielding, and it's safe
-            // to call the libRebol API again.
-            //
-            input_resolve(function () {
-                return reb.Text(text)
-            })
-        }
-        else {
-            // If we're using pthreads, we should be able to make API requests
-            // from the GUI, and give the JS-AWAITER's return value directly.
-            //
-            input_resolve(reb.Text(text))
-        }
+        input_resolve(text)
         input_resolve = undefined
 
         e.preventDefault()  // Allowing enter puts a <br>
@@ -615,135 +597,10 @@ function replaceSelectedText(newText) { // https://stackoverflow.com/a/3997896
     }
 }
 
-//=//// ROW CLICK WITH MULTI-SELECT ////////////////////////////////////////=//
-//
-// Taken from:
-// https://stackoverflow.com/a/17966381
-//
-
-var lastSelectedRow
-var watchlist = document.getElementById('watchlist')
-var trs = document.getElementById('watchlist')
-    .tBodies[0]
-    .getElementsByTagName('tr')
-
-RowClick = function(currenttr, lock) {
-    if (window.event.ctrlKey)
-        toggleRow(currenttr)
-
-    if (window.event.button === 0) {
-        if (!window.event.ctrlKey && !window.event.shiftKey) {
-            clearAll()
-            toggleRow(currenttr)
-        }
-
-        if (window.event.shiftKey) {
-            selectRowsBetweenIndexes(
-                [lastSelectedRow.rowIndex, currenttr.rowIndex]
-            )
-        }
-    }
-}
-
-function toggleRow(row) {
-    row.className = (row.className == 'selected') ? '' : 'selected'
-    lastSelectedRow = row
-}
-
-function selectRowsBetweenIndexes(indexes) {
-    indexes.sort(function(a, b) {
-        return a - b
-    })
-
-    for (var i = indexes[0]; i <= indexes[1]; i++)
-        trs[i - 1].className = 'selected'
-}
-
-function clearAll() {
-    for (var i = 0; i < trs.length; i++)
-        trs[i].className = ''
-}
-
-
-//=//// RIGHT-CLICK MENU ///////////////////////////////////////////////////=//
-//
-// Taken from:
-// https://stackoverflow.com/a/35730445
-//
-// !!! This was an experiment, but it's genuinely annoying to take away the
-// user's browser menu (e.g. to right click links and open a new tab).
-// Review the motivation for doing this.
-
-/*
-var i = document.getElementById("menu").style
-document.addEventListener('contextmenu', function(e) {
-    var posX = e.clientX
-    var posY = e.clientY
-    menu(posX, posY)
-    e.preventDefault()
-}, false)
-
-document.addEventListener('click', function(e) {
-    i.opacity = "0"
-    setTimeout(function() {
-      i.visibility = "hidden"
-    }, 501)
-}, false)
-
-function menu(x, y) {
-    i.top = y + "px"
-    i.left = x + "px"
-    i.visibility = "visible"
-    i.opacity = "1"
-}
-
-OnMenuCut = function() {
-    clipboard = window.getSelection().toString()
-    document.execCommand('cut')
-}
-
-OnMenuCopy = function() {
-    clipboard = window.getSelection().toString()
-    document.execCommand('copy')
-}
-
-OnMenuPaste = function() {
-    if (!clipboard)
-        alert("For security reasons, paste is only allowed from within page")
-    else
-        replaceSelectedText(clipboard)
-}
-*/
 
 //=//// END `DOMContentLoaded` HANDLER /////////////////////////////////////=//
 
-onGuiInitialized()
-
-r3_ready_promise.then(function() {
-
-    // As an expedient way of beginning a more formal test process, a small
-    // script that must be run outside of a rebPromise() is loaded by this
-    // point.  Invoke it at top level before doing anything with the ReplPad.
-
-    console.log("Performing some basic tests from %toplevel.test.js")
-    if (!toplevelTest())
-        throw ("Test failure encountered in %toplevel.test.js")
-
-    // !!! This isn't the ideal place to put this, but scripts have to have
-    // an idea of what the "current directory is" when they are running.  Then
-    // resources are fetched by path relative to that.
-    //
-    // Method chosen for getting the URL dir adapted one that included slash:
-    // https://stackoverflow.com/a/16985358
-    //
-    let url = document.URL
-    let base_url
-    if (url.charAt(url.length - 1) === '/')
-        base_url = url
-    else
-        base_url = url.slice(0, url.lastIndexOf('/')) + '/'
-
-    reb.Elide("change-dir system/options/path: as url!", reb.T(base_url))
+load_r3.then(() => {
 
     // %replpad.reb contains JS-NATIVE/JS-AWAITER declarations, so it can only
     // run after libr3 is loaded and the JavaScript extension is initialized.
@@ -812,11 +669,16 @@ r3_ready_promise.then(function() {
     console.log("Calling reb.Shutdown()")
     reb.Shutdown()
 
-  }).catch(function(error) {
-
-    console.error(error)  // shows stack trace (if user opens console...)
-    alert(error.toString())  // notifies user w/no console open
-
   })
+  // !!! We could put a catch clause here, e.g.
+  //
+  //    .catch(function(error) {
+  //        console.error(error)  // shows stack trace (if console open)
+  //        alert(error.toString())  // notifies user w/no console open
+  //    }
+  //
+  // However, allowing code to error at the spot where a problem happens
+  // offers easier debugging.  Consider having a "release version" that does
+  // something friendlier, perhaps offering to restart the console.
 
 }) // lame to indent nearly this entire file, just to put it in the handler
